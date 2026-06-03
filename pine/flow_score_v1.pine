@@ -1,5 +1,5 @@
 //@version=6
-indicator("Tredr Flow v1", overlay=true)
+indicator("Tredr Flow v1.1", overlay=true)
 
 // =====================
 // EMAs
@@ -23,7 +23,7 @@ atr = ta.atr(14)
 atr_ma = ta.sma(atr, 20)
 
 // =====================
-// Volume
+// VOLUME
 // =====================
 
 vol_ma = ta.sma(volume, 20)
@@ -32,7 +32,7 @@ vol_ma = ta.sma(volume, 20)
 // FLOW SCORE
 // =====================
 
-float score = 0
+score = 0
 
 // Trend
 if ema20 > ema50
@@ -70,19 +70,84 @@ if low > low[1]
     score += 1
 
 // =====================
-// COLORING
+// REGIME DETECTION
+// =====================
+
+regime =
+     atr > atr_ma and math.abs(ema20 - ema50) > close * 0.01
+     ? "TREND"
+     : "RANGE"
+
+// =====================
+// BAR COLORS
 // =====================
 
 barcolor(
- score >= 8 ? color.lime :
- score >= 6 ? color.green :
- score >= 4 ? color.gray :
- score >= 2 ? color.orange :
- color.red
+     score >= 8 ? color.lime :
+     score >= 6 ? color.green :
+     score >= 4 ? color.gray :
+     score >= 2 ? color.orange :
+     color.red
 )
 
 // =====================
-// SCORE LABEL
+// DASHBOARD
 // =====================
 
-plot(score, title="Flow Score")
+var table dashboard = table.new(
+     position.top_right,
+     2,
+     8,
+     border_width = 1
+)
+
+if barstate.islast
+
+    table.cell(dashboard, 0, 0, "Metric")
+    table.cell(dashboard, 1, 0, "Value")
+
+    table.cell(dashboard, 0, 1, "Flow Score")
+    table.cell(dashboard, 1, 1, str.tostring(score) + "/10")
+
+    table.cell(dashboard, 0, 2, "Trend")
+    table.cell(
+         dashboard,
+         1,
+         2,
+         ema20 > ema50 ? "Bull" : "Bear"
+    )
+
+    table.cell(dashboard, 0, 3, "Momentum")
+    table.cell(
+         dashboard,
+         1,
+         3,
+         rsi > 50 ? "Bull" : "Bear"
+    )
+
+    table.cell(dashboard, 0, 4, "Volume")
+    table.cell(
+         dashboard,
+         1,
+         4,
+         volume > vol_ma ? "Strong" : "Weak"
+    )
+
+    table.cell(dashboard, 0, 5, "Volatility")
+    table.cell(
+         dashboard,
+         1,
+         5,
+         atr > atr_ma ? "High" : "Low"
+    )
+
+    structure =
+         high > high[1] and low > low[1]
+         ? "HH/HL"
+         : "Neutral"
+
+    table.cell(dashboard, 0, 6, "Structure")
+    table.cell(dashboard, 1, 6, structure)
+
+    table.cell(dashboard, 0, 7, "Regime")
+    table.cell(dashboard, 1, 7, regime)
