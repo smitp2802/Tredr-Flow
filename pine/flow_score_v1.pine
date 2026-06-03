@@ -1,5 +1,5 @@
 //@version=6
-indicator("Tredr Flow v1.1", overlay=true)
+indicator("Tredr Flow v1.2", overlay=true)
 
 // =====================
 // EMAs
@@ -151,3 +151,40 @@ if barstate.islast
 
     table.cell(dashboard, 0, 7, "Regime")
     table.cell(dashboard, 1, 7, regime)
+
+// =====================
+// LIQUIDITY SWEEPS
+// =====================
+
+lookback = 50
+
+prevHigh = ta.highest(high[1], lookback)
+prevLow = ta.lowest(low[1], lookback)
+
+// Buyside Liquidity Sweep
+
+bslSweep =
+     high > prevHigh and
+     close < prevHigh
+
+// Sellside Liquidity Sweep
+
+sslSweep =
+     low < prevLow and
+     close > prevLow
+
+plotshape(
+     bslSweep,
+     title="BSL Sweep",
+     location=location.abovebar,
+     style=shape.triangledown,
+     size=size.tiny
+)
+
+plotshape(
+     sslSweep,
+     title="SSL Sweep",
+     location=location.belowbar,
+     style=shape.triangleup,
+     size=size.tiny
+)
