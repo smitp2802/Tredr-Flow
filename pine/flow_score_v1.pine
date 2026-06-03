@@ -1,0 +1,88 @@
+//@version=6
+indicator("Tredr Flow v1", overlay=true)
+
+// =====================
+// EMAs
+// =====================
+
+ema20 = ta.ema(close, 20)
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+
+// =====================
+// RSI
+// =====================
+
+rsi = ta.rsi(close, 14)
+
+// =====================
+// ATR
+// =====================
+
+atr = ta.atr(14)
+atr_ma = ta.sma(atr, 20)
+
+// =====================
+// Volume
+// =====================
+
+vol_ma = ta.sma(volume, 20)
+
+// =====================
+// FLOW SCORE
+// =====================
+
+float score = 0
+
+// Trend
+if ema20 > ema50
+    score += 1
+
+if ema50 > ema200
+    score += 1
+
+// Momentum
+if rsi > 55
+    score += 1
+
+if rsi > 60
+    score += 1
+
+// Volume
+if volume > vol_ma
+    score += 1
+
+if volume > vol_ma * 1.5
+    score += 1
+
+// Volatility
+if atr > atr_ma
+    score += 1
+
+if atr > atr_ma * 1.2
+    score += 1
+
+// Structure
+if high > high[1]
+    score += 1
+
+if low > low[1]
+    score += 1
+
+// =====================
+// COLORING
+// =====================
+
+barcolor(
+ score >= 8 ? color.lime :
+ score >= 6 ? color.green :
+ score >= 4 ? color.gray :
+ score >= 2 ? color.orange :
+ color.red
+)
+
+// =====================
+// SCORE LABEL
+// =====================
+
+plot(score, title="Flow Score")
